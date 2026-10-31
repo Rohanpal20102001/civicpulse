@@ -14,43 +14,51 @@ VITE_API_BASE_URL=http://localhost:8000
 
 
 
+from uuid import UUID
 
-from datetime import datetime, timezone
-from uuid import UUID, uuid4
+from fastapi import APIRouter, HTTPException, status
 
-from app.modules.issues.schemas import (
-    IssueCreate,
-    IssueResponse,
-    IssueStatus,
+from app.modules.issues.repository import issue_repository
+from app.modules.issues.schemas import IssueCreate, IssueResponse
+
+
+router = APIRouter(
+    prefix="/issues",
+    tags=["Issues"],
 )
 
 
-class IssueRepository:
-    """Temporary in-memory issue repository."""
+@router.post(
+    "",
+    response_model=IssueResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_issue(issue_data: IssueCreate):
+    """Submit a new civic issue."""
+    return issue_repository.create(issue_data)
 
-    def __init__(self) -> None:
-        self._issues: dict[UUID, IssueResponse] = {}
 
-    def create(self, issue_data: IssueCreate) -> IssueResponse:
-        issue = IssueResponse(
-            id=uuid4(),
-            title=issue_data.title,
-            description=issue_data.description,
-            category=issue_data.category,
-            status=IssueStatus.SUBMITTED,
-            latitude=issue_data.latitude,
-            longitude=issue_data.longitude,
-            created_at=datetime.now(timezone.utc),
+@router.get(
+    "",
+    response_model=list[IssueResponse],
+)
+async def get_issues():
+    """Retrieve all submitted civic issues."""
+    return issue_repository.get_all()
+
+
+@router.get(
+    "/{issue_id}",
+    response_model=IssueResponse,
+)
+async def get_issue(issue_id: UUID):
+    """Retrieve a civic issue by its ID."""
+    issue = issue_repository.get_by_id(issue_id)
+
+    if issue is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Issue not found",
         )
 
-        self._issues[issue.id] = issue
-        return issue
-
-    def get_all(self) -> list[IssueResponse]:
-        return list(self._issues.values())
-
-    def get_by_id(self, issue_id: UUID) -> IssueResponse | None:
-        return self._issues.get(issue_id)
-
-
-issue_repository = IssueRepository()
+    return issue
