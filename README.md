@@ -9,5 +9,10 @@ http://127.0.0.1:8000/docs
 
 http://localhost:3001/health
 
-echo 'export PATH="$(brew --prefix postgresql@16)/bin:$PATH"' >> ~/.zshrc
-source ~/.zshrc
+brew list --versions postgresql@16 postgresql@17 postgresql@18 postgis
+
+brew services list
+
+psql -d civicpulse -c "SELECT version();"
+
+psql -d civicpulse -c "SELECT name, default_version, installed_version FROM pg_available_extensions WHERE name LIKE 'postgis%';"
