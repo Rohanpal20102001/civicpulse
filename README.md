@@ -12,53 +12,12 @@ http://localhost:3001/health
 VITE_API_BASE_URL=http://localhost:8000
 
 
+from fastapi import APIRouter
+
+from app.modules.issues.routes import router as issues_router
 
 
-from uuid import UUID
+api_router = APIRouter(prefix="/api/v1")
 
-from fastapi import APIRouter, HTTPException, status
+api_router.include_router(issues_router)
 
-from app.modules.issues.repository import issue_repository
-from app.modules.issues.schemas import IssueCreate, IssueResponse
-
-
-router = APIRouter(
-    prefix="/issues",
-    tags=["Issues"],
-)
-
-
-@router.post(
-    "",
-    response_model=IssueResponse,
-    status_code=status.HTTP_201_CREATED,
-)
-async def create_issue(issue_data: IssueCreate):
-    """Submit a new civic issue."""
-    return issue_repository.create(issue_data)
-
-
-@router.get(
-    "",
-    response_model=list[IssueResponse],
-)
-async def get_issues():
-    """Retrieve all submitted civic issues."""
-    return issue_repository.get_all()
-
-
-@router.get(
-    "/{issue_id}",
-    response_model=IssueResponse,
-)
-async def get_issue(issue_id: UUID):
-    """Retrieve a civic issue by its ID."""
-    issue = issue_repository.get_by_id(issue_id)
-
-    if issue is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Issue not found",
-        )
-
-    return issue
