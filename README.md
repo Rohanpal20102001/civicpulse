@@ -7,11 +7,39 @@ http://127.0.0.1:8000/health⁠
 
 http://127.0.0.1:8000/docs
 
-cd apps/realtime
 
-npm init -y
+import Fastify from "fastify";
 
-npm install fastify @fastify/cors socket.io dotenv zod
-npm install -D typescript tsx @types/node
+const app = Fastify({
+  logger: true
+});
 
-npx tsc --init
+app.get("/health", async () => {
+  return {
+    status: "healthy",
+    service: "civicpulse-realtime"
+  };
+});
+
+const start = async () => {
+  try {
+    await app.listen({
+      port: 3001,
+      host: "0.0.0.0"
+    });
+
+    app.log.info("Realtime service started");
+  } catch (error) {
+    app.log.error(error);
+    process.exit(1);
+  }
+};
+
+start();
+
+"scripts": {
+  "dev": "tsx watch src/server.ts",
+  "build": "tsc",
+  "start": "node dist/server.js"
+}
+
