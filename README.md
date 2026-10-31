@@ -9,14 +9,56 @@ http://127.0.0.1:8000/docs
 
 http://localhost:3001/health
 
-rohanpal@CKMAC190 ~ % psql -d civicpulse -c "SELECT current_database(), current_user, PostGIS_Full_Version();"
- current_database | current_user |                                                                                                                                                                                    postgis_full_version                                                                                                                                                                                    
-------------------+--------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
- civicpulse       | rohanpal     | POSTGIS="3.7.0 0" [EXTENSION] PGSQL="180" GEOS="3.15.0-CAPI-1.21.0" PROJ="9.9.0 NETWORK_ENABLED=OFF URL_ENDPOINT=https://cdn.proj.org USER_WRITABLE_DIRECTORY=/Users/rohanpal/Library/Application Support/proj DATABASE_PATH=/opt/homebrew/Cellar/proj/9.9.0/share/proj/proj.db" (compiled against PROJ 9.9.0) LIBXML="2.15.4" LIBJSON="0.19" LIBPROTOBUF="1.5.2" WAGYU="0.5.0 (Internal)"
-(1 row)
+cd ~/Projects/civicpulse/services/api
 
-rohanpal@CKMAC190 ~ % psql -d civicpulse -c "SHOW unix_socket_directories;"                                   
- unix_socket_directories 
--------------------------
- /tmp
-(1 row)
+source .venv/bin/activate
+
+pip show sqlalchemy psycopg2-binary alembic geoalchemy2
+
+pip install geoalchemy2
+
+python -c "import sqlalchemy, psycopg2, alembic, geoalchemy2; print('All database dependencies are available')"
+
+
+
+python - <<'PY'
+from sqlalchemy import create_engine, text
+
+DATABASE_URL = "postgresql+psycopg2://rohanpal@/civicpulse?host=/tmp"
+
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True,
+    echo=False
+)
+
+try:
+    with engine.connect() as connection:
+        result = connection.execute(
+            text("""
+                SELECT
+                    current_database(),
+                    current_user,
+                    PostGIS_Full_Version()
+            """)
+        )
+
+        database, user, postgis_version = result.fetchone()
+
+        print("Database connection successful!")
+        print(f"Database: {database}")
+        print(f"User: {user}")
+        print(f"PostGIS: {postgis_version}")
+
+except Exception as error:
+    print("Database connection failed!")
+    print(f"Error: {error}")
+
+finally:
+    engine.dispose()
+PY
+
+
+
+
+pip show sqlalchemy psycopg2-binary alembic geoalchemy2
