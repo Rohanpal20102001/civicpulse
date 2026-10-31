@@ -14,39 +14,43 @@ VITE_API_BASE_URL=http://localhost:8000
 
 
 
-from datetime import datetime
-from enum import Enum
-from uuid import UUID
 
-from pydantic import BaseModel, Field
+from datetime import datetime, timezone
+from uuid import UUID, uuid4
 
-
-class IssueCategory(str, Enum):
-    ROAD_DAMAGE = "ROAD_DAMAGE"
-    GARBAGE = "GARBAGE"
-    STREETLIGHT = "STREETLIGHT"
-    WATER_LEAKAGE = "WATER_LEAKAGE"
-    OTHER = "OTHER"
+from app.modules.issues.schemas import (
+    IssueCreate,
+    IssueResponse,
+    IssueStatus,
+)
 
 
-class IssueStatus(str, Enum):
-    SUBMITTED = "SUBMITTED"
+class IssueRepository:
+    """Temporary in-memory issue repository."""
+
+    def __init__(self) -> None:
+        self._issues: dict[UUID, IssueResponse] = {}
+
+    def create(self, issue_data: IssueCreate) -> IssueResponse:
+        issue = IssueResponse(
+            id=uuid4(),
+            title=issue_data.title,
+            description=issue_data.description,
+            category=issue_data.category,
+            status=IssueStatus.SUBMITTED,
+            latitude=issue_data.latitude,
+            longitude=issue_data.longitude,
+            created_at=datetime.now(timezone.utc),
+        )
+
+        self._issues[issue.id] = issue
+        return issue
+
+    def get_all(self) -> list[IssueResponse]:
+        return list(self._issues.values())
+
+    def get_by_id(self, issue_id: UUID) -> IssueResponse | None:
+        return self._issues.get(issue_id)
 
 
-class IssueCreate(BaseModel):
-    title: str = Field(min_length=5, max_length=200)
-    description: str = Field(min_length=10, max_length=2000)
-    category: IssueCategory
-    latitude: float = Field(ge=-90, le=90)
-    longitude: float = Field(ge=-180, le=180)
-
-
-class IssueResponse(BaseModel):
-    id: UUID
-    title: str
-    description: str
-    category: IssueCategory
-    status: IssueStatus
-    latitude: float
-    longitude: float
-    created_at: datetime
+issue_repository = IssueRepository()
