@@ -9,10 +9,28 @@ http://127.0.0.1:8000/docs
 
 http://localhost:3001/health
 
-{
-  "title": "Large pothole near main road",
-  "description": "A large pothole is causing problems for vehicles.",
-  "category": "ROAD_DAMAGE",
-  "latitude": 22.5726,
-  "longitude": 88.3639
+export type IssueCategory =
+  | "ROAD_DAMAGE"
+  | "GARBAGE"
+  | "STREETLIGHT"
+  | "WATER_LEAKAGE"
+  | "OTHER";
+
+export interface IssueCreate {
+  title: string;
+  description: string;
+  category: IssueCategory;
+  latitude: number;
+  longitude: number;
+}
+
+export interface Issue {
+  id: string;
+  title: string;
+  description: string;
+  category: IssueCategory;
+  status: "SUBMITTED";
+  latitude: number;
+  longitude: number;
+  created_at: string;
 }
