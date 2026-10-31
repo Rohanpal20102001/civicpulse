@@ -1,63 +1,98 @@
 # civicpulse
 Open-source civic issue intelligence platform for reporting, tracking, and analyzing community infrastructure problems.
 
-http://127.0.0.1:8000/⁠
+import os
+from dotenv import load_dotenv
 
-http://127.0.0.1:8000/health⁠
+load_dotenv()
 
-http://127.0.0.1:8000/docs
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-http://localhost:3001/health
+if not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL is not configured")
 
-./.env
-./.env.example
-./.venv/bin/activate
-./.venv/bin/activate.csh
-./.venv/bin/activate.fish
-./.venv/bin/Activate.ps1
-./.venv/bin/alembic
-./.venv/bin/cffi-gen-src
-./.venv/bin/dotenv
-./.venv/bin/fastapi
-./.venv/bin/idna
-./.venv/bin/mako-render
-./.venv/bin/pip
-./.venv/bin/pip3
-./.venv/bin/pip3.12
-./.venv/bin/pyrsa-decrypt
-./.venv/bin/pyrsa-encrypt
-./.venv/bin/pyrsa-keygen
-./.venv/bin/pyrsa-priv2pub
-./.venv/bin/pyrsa-sign
-./.venv/bin/pyrsa-verify
-./.venv/bin/uvicorn
-./.venv/bin/watchfiles
-./.venv/bin/websockets
-./.venv/pyvenv.cfg
-./alembic.ini
-./alembic/env.py
-./alembic/README
-./alembic/script.py.mako
-./app/__init__.py
-./app/__pycache__/__init__.cpython-312.pyc
-./app/__pycache__/main.cpython-312.pyc
-./app/api/__init__.py
-./app/api/__pycache__/__init__.cpython-312.pyc
-./app/api/__pycache__/router.cpython-312.pyc
-./app/api/router.py
-./app/core/__init__.py
-./app/core/config.py
-./app/database/__init__.py
-./app/database/base.py
-./app/database/dependencies.py
-./app/database/session.py
-./app/main.py
-./app/modules/__init__.py
-./app/modules/__pycache__/__init__.cpython-312.pyc
-./app/modules/issues/__init__.py
-./app/modules/issues/models.py
-./app/modules/issues/repository.py
-./app/modules/issues/routes.py
-./app/modules/issues/schemas.py
-./pyproject.toml
-./requirements.txt
+
+
+
+
+from sqlalchemy.orm import DeclarativeBase
+
+
+class Base(DeclarativeBase):
+    """
+    Base class for all SQLAlchemy models.
+    """
+
+    pass
+
+
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+from app.core.config import DATABASE_URL
+
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True,
+    echo=False,
+)
+
+SessionLocal = sessionmaker(
+    bind=engine,
+    autoflush=False,
+    expire_on_commit=False,
+)
+
+
+
+from collections.abc import Generator
+
+from sqlalchemy.orm import Session
+
+from app.database.session import SessionLocal
+
+
+def get_db() -> Generator[Session, None, None]:
+    """
+    Provide a database session to a FastAPI request.
+
+    Yields:
+        Session: An active SQLAlchemy database session.
+    """
+    db = SessionLocal()
+
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+
+from sqlalchemy import text
+
+from app.database.session import engine
+
+
+def test_database_connection():
+    with engine.connect() as connection:
+        result = connection.execute(
+            text("SELECT current_database(), current_user")
+        )
+
+        database, user = result.fetchone()
+
+        assert database == "civicpulse"
+        assert user == "rohanpal"
+
+        print(f"Connected successfully: {database}, {user}")
+
+
+if __name__ == "__main__":
+    test_database_connection()
+    print("Database connection test passed!")
+
+
+
+
+
