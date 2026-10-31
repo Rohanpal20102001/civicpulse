@@ -14,21 +14,39 @@ VITE_API_BASE_URL=http://localhost:8000
 
 
 
+from datetime import datetime
+from enum import Enum
+from uuid import UUID
 
-[plugin:vite:import-analysis] Failed to resolve import "axios" from "src/api/client.ts". Does the file exist?
-/Users/rohanpal/Projects/civicpulse/apps/web/src/api/client.ts:1:18
-1  |  import axios from "axios";
-   |                     ^
-2  |  const apiClient = axios.create({
-3  |  	baseURL: import.meta.env.VITE_API_BASE_URL,
-    at TransformPluginContext._formatLog (file:///Users/rohanpal/Projects/civicpulse/apps/web/node_modules/vite/dist/node/chunks/node.js:8803:39)
-    at TransformPluginContext.error (file:///Users/rohanpal/Projects/civicpulse/apps/web/node_modules/vite/dist/node/chunks/node.js:8800:14)
-    at resolveId (file:///Users/rohanpal/Projects/civicpulse/apps/web/node_modules/vite/dist/node/chunks/node.js:26594:18)
-    at async file:///Users/rohanpal/Projects/civicpulse/apps/web/node_modules/vite/dist/node/chunks/node.js:26693:23
-    at async Promise.all (index 0)
-    at async TransformPluginContext.transform (file:///Users/rohanpal/Projects/civicpulse/apps/web/node_modules/vite/dist/node/chunks/node.js:26666:4)
-    at async EnvironmentPluginContainer.transform (file:///Users/rohanpal/Projects/civicpulse/apps/web/node_modules/vite/dist/node/chunks/node.js:8582:14)
-    at async loadAndTransform (file:///Users/rohanpal/Projects/civicpulse/apps/web/node_modules/vite/dist/node/chunks/node.js:20155:26)
-    at async viteTransformMiddleware (file:///Users/rohanpal/Projects/civicpulse/apps/web/node_modules/vite/dist/node/chunks/node.js:20375:20)
-Click outside, press Esc key, or fix the code to dismiss.
-You can also disable this overlay by setting server.hmr.overlay to false in vite.config.ts.
+from pydantic import BaseModel, Field
+
+
+class IssueCategory(str, Enum):
+    ROAD_DAMAGE = "ROAD_DAMAGE"
+    GARBAGE = "GARBAGE"
+    STREETLIGHT = "STREETLIGHT"
+    WATER_LEAKAGE = "WATER_LEAKAGE"
+    OTHER = "OTHER"
+
+
+class IssueStatus(str, Enum):
+    SUBMITTED = "SUBMITTED"
+
+
+class IssueCreate(BaseModel):
+    title: str = Field(min_length=5, max_length=200)
+    description: str = Field(min_length=10, max_length=2000)
+    category: IssueCategory
+    latitude: float = Field(ge=-90, le=90)
+    longitude: float = Field(ge=-180, le=180)
+
+
+class IssueResponse(BaseModel):
+    id: UUID
+    title: str
+    description: str
+    category: IssueCategory
+    status: IssueStatus
+    latitude: float
+    longitude: float
+    created_at: datetime
