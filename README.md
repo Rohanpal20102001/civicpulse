@@ -11,36 +11,52 @@ http://localhost:3001/health
 
 VITE_API_BASE_URL=http://localhost:8000
 
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+import { useEffect, useState } from "react";
+import apiClient from "./api/client";
 
-app = FastAPI(
-    title="CivicPulse API",
-    description="Open-source civic issue intelligence platform",
-    version="0.1.0",
-)
+interface HealthResponse {
+  status: string;
+  service: string;
+}
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+function App() {
+  const [health, setHealth] = useState<HealthResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    const checkBackend = async () => {
+      try {
+        const response = await apiClient.get<HealthResponse>("/health");
+        setHealth(response.data);
+      } catch {
+        setError("Unable to connect to CivicPulse API.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-@app.get("/")
-async def root():
-    return {
-        "message": "Welcome to CivicPulse",
-        "version": "0.1.0",
-        "status": "running",
-    }
+    checkBackend();
+  }, []);
 
+  return (
+    <main style={{ padding: "40px", fontFamily: "Arial, sans-serif" }}>
+      <h1>CivicPulse</h1>
+      <p>Community-powered civic issue intelligence platform.</p>
 
-@app.get("/health")
-async def health_check():
-    return {
-        "status": "healthy",
-        "service": "civicpulse-api",
-    }
+      <h2>Backend Connection</h2>
+
+      {loading && <p>Checking API connection...</p>}
+
+      {health && (
+        <p>
+          Status: {health.status} | Service: {health.service}
+        </p>
+      )}
+
+      {error && <p style={{ color: "red" }}>{error}</p>}
+    </main>
+  );
+}
+
+export default App;
