@@ -11,52 +11,24 @@ http://localhost:3001/health
 
 VITE_API_BASE_URL=http://localhost:8000
 
-import { useEffect, useState } from "react";
-import apiClient from "./api/client";
 
-interface HealthResponse {
-  status: string;
-  service: string;
-}
 
-function App() {
-  const [health, setHealth] = useState<HealthResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const checkBackend = async () => {
-      try {
-        const response = await apiClient.get<HealthResponse>("/health");
-        setHealth(response.data);
-      } catch {
-        setError("Unable to connect to CivicPulse API.");
-      } finally {
-        setLoading(false);
-      }
-    };
 
-    checkBackend();
-  }, []);
-
-  return (
-    <main style={{ padding: "40px", fontFamily: "Arial, sans-serif" }}>
-      <h1>CivicPulse</h1>
-      <p>Community-powered civic issue intelligence platform.</p>
-
-      <h2>Backend Connection</h2>
-
-      {loading && <p>Checking API connection...</p>}
-
-      {health && (
-        <p>
-          Status: {health.status} | Service: {health.service}
-        </p>
-      )}
-
-      {error && <p style={{ color: "red" }}>{error}</p>}
-    </main>
-  );
-}
-
-export default App;
+[plugin:vite:import-analysis] Failed to resolve import "axios" from "src/api/client.ts". Does the file exist?
+/Users/rohanpal/Projects/civicpulse/apps/web/src/api/client.ts:1:18
+1  |  import axios from "axios";
+   |                     ^
+2  |  const apiClient = axios.create({
+3  |  	baseURL: import.meta.env.VITE_API_BASE_URL,
+    at TransformPluginContext._formatLog (file:///Users/rohanpal/Projects/civicpulse/apps/web/node_modules/vite/dist/node/chunks/node.js:8803:39)
+    at TransformPluginContext.error (file:///Users/rohanpal/Projects/civicpulse/apps/web/node_modules/vite/dist/node/chunks/node.js:8800:14)
+    at resolveId (file:///Users/rohanpal/Projects/civicpulse/apps/web/node_modules/vite/dist/node/chunks/node.js:26594:18)
+    at async file:///Users/rohanpal/Projects/civicpulse/apps/web/node_modules/vite/dist/node/chunks/node.js:26693:23
+    at async Promise.all (index 0)
+    at async TransformPluginContext.transform (file:///Users/rohanpal/Projects/civicpulse/apps/web/node_modules/vite/dist/node/chunks/node.js:26666:4)
+    at async EnvironmentPluginContainer.transform (file:///Users/rohanpal/Projects/civicpulse/apps/web/node_modules/vite/dist/node/chunks/node.js:8582:14)
+    at async loadAndTransform (file:///Users/rohanpal/Projects/civicpulse/apps/web/node_modules/vite/dist/node/chunks/node.js:20155:26)
+    at async viteTransformMiddleware (file:///Users/rohanpal/Projects/civicpulse/apps/web/node_modules/vite/dist/node/chunks/node.js:20375:20)
+Click outside, press Esc key, or fix the code to dismiss.
+You can also disable this overlay by setting server.hmr.overlay to false in vite.config.ts.
