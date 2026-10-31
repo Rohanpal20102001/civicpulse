@@ -11,14 +11,36 @@ http://localhost:3001/health
 
 VITE_API_BASE_URL=http://localhost:8000
 
-import axios from "axios";
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
-const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
-  timeout: 10000,
-});
+app = FastAPI(
+    title="CivicPulse API",
+    description="Open-source civic issue intelligence platform",
+    version="0.1.0",
+)
 
-export default apiClient;
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+@app.get("/")
+async def root():
+    return {
+        "message": "Welcome to CivicPulse",
+        "version": "0.1.0",
+        "status": "running",
+    }
+
+
+@app.get("/health")
+async def health_check():
+    return {
+        "status": "healthy",
+        "service": "civicpulse-api",
+    }
