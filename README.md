@@ -9,8 +9,6 @@ http://127.0.0.1:8000/docs
 
 http://localhost:3001/health
 
-cat /opt/homebrew/share/postgresql@18/extension/postgis.control
+psql -d civicpulse -c "SELECT current_database(), current_user, PostGIS_Full_Version();"
 
-ls -l /opt/homebrew/share/postgresql@18/extension/postgis--*.sql
-
-ls -l /opt/homebrew/lib/postgresql@18/
+psql -d civicpulse -c "SHOW unix_socket_directories;"
