@@ -9,28 +9,21 @@ http://127.0.0.1:8000/docs
 
 http://localhost:3001/health
 
-export type IssueCategory =
-  | "ROAD_DAMAGE"
-  | "GARBAGE"
-  | "STREETLIGHT"
-  | "WATER_LEAKAGE"
-  | "OTHER";
+import apiClient from "./client";
+import type { Issue, IssueCreate } from "../types/issue";
 
-export interface IssueCreate {
-  title: string;
-  description: string;
-  category: IssueCategory;
-  latitude: number;
-  longitude: number;
-}
+export const getIssues = async (): Promise<Issue[]> => {
+  const response = await apiClient.get<Issue[]>("/api/v1/issues");
+  return response.data;
+};
 
-export interface Issue {
-  id: string;
-  title: string;
-  description: string;
-  category: IssueCategory;
-  status: "SUBMITTED";
-  latitude: number;
-  longitude: number;
-  created_at: string;
-}
+export const createIssue = async (
+  issue: IssueCreate
+): Promise<Issue> => {
+  const response = await apiClient.post<Issue>(
+    "/api/v1/issues",
+    issue
+  );
+
+  return response.data;
+};
