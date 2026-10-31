@@ -18,3 +18,9 @@ cd web
 npm install
 npm install axios @tanstack/react-query leaflet react-leaflet
 npm install lucide-react
+
+cd ~/Projects/civicpulse/apps/web
+
+node -v
+npm -v
+npm list typescript vite @vitejs/plugin-react
