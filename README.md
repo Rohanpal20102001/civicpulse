@@ -7,7 +7,6 @@ cd ~/Projects/civicpulse/services/api
 source .venv/bin/activate
 
 
-alembic current
+tree -I 'node_modules|.venv|__pycache__|.git'
 
-
-alembic revision --autogenerate -m "create issues table"
+find . -maxdepth 3 -type f | sort
